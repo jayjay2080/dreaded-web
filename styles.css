@@ -1,3 +1,30 @@
+.updates-list {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.update {
+  background: var(--stone-800);
+  border: 4px solid var(--stone-700);
+  border-radius: calc(var(--radius) + 4px);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 0 var(--stone-950);
+}
+.update h3 {
+  margin-top: 0;
+  color: var(--leaf-300);
+  font-size: 1.2rem;
+}
+.update ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+.update li {
+  margin-bottom: 0.4rem;
+}
+
+
 
 /* Live badge */
 .live-badge {

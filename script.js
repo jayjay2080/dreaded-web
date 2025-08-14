@@ -341,3 +341,84 @@ stage.addEventListener("focusout", () => { if (!paused) startAuto(); });
 
 /* ========== STARTUP ========== */
 initCarousel();
+
+/* ========== UPDATES PAGE LOADER (JSON → HTML) ========== */
+(async function loadUpdatesIfPresent() {
+  const list = document.getElementById("updatesList");
+  if (!list) return;
+
+  const loadingEl = document.getElementById("updatesLoading");
+  const fmt = new Intl.DateTimeFormat(undefined, { dateStyle: "long" });
+
+  try {
+    const res = await fetch("updates.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Sort newest first by date (YYYY-MM-DD expected)
+    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    list.innerHTML = "";
+    data.forEach(entry => {
+      const art = document.createElement("article");
+      art.className = "update";
+
+      const h3 = document.createElement("h3");
+      h3.textContent = entry.title || "Update";
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = entry.date ? fmt.format(new Date(entry.date)) : "";
+
+      art.append(h3, date);
+
+      // If categorized groups exist, render each; otherwise fall back to 'changes'
+      const groups = [
+        ["added",   "Added",   "added"],
+        ["changed", "Changed", "changed"],
+        ["fixed",   "Fixed",   "fixed"],
+        ["removed", "Removed", "removed"]
+      ];
+
+      let renderedAnyGroup = false;
+      groups.forEach(([key, label, cls]) => {
+        const items = entry[key];
+        if (Array.isArray(items) && items.length) {
+          renderedAnyGroup = true;
+          const gt = document.createElement("div");
+          gt.className = "group-title";
+          const badge = document.createElement("span");
+          badge.className = `badge ${cls}`;
+          badge.textContent = label;
+          gt.appendChild(badge);
+          art.appendChild(gt);
+
+          const ul = document.createElement("ul");
+          items.forEach(t => {
+            const li = document.createElement("li");
+            li.textContent = t;
+            ul.appendChild(li);
+          });
+          art.appendChild(ul);
+        }
+      });
+
+      if (!renderedAnyGroup && Array.isArray(entry.changes)) {
+        const ul = document.createElement("ul");
+        entry.changes.forEach(t => {
+          const li = document.createElement("li");
+          li.textContent = t;
+          ul.appendChild(li);
+        });
+        art.appendChild(ul);
+      }
+
+      list.appendChild(art);
+    });
+
+  } catch (err) {
+    console.error("Failed to load updates:", err);
+    list.innerHTML = `<div class="updates-error" role="alert">Couldn’t load updates right now.</div>`;
+  } finally {
+    if (loadingEl) loadingEl.remove();
+  }
+})();
