@@ -16,6 +16,30 @@
     <h1 class="logo">Dreaded <span>Dragons</span></h1>
   </header>
 
+  <!-- Server Status Widget (fixed top-right of page) -->
+<section class="server-status" id="serverStatus"
+         data-host="ddragon.net" data-port="">
+  <div class="status-card">
+    <div class="status-top">
+      <span class="dot" id="srvDot" aria-hidden="true"></span>
+      <span class="state" id="srvState">Checking…</span>
+    </div>
+    <div class="status-grid">
+      <div class="row">
+        <span class="label">Players</span>
+        <span class="value" id="srvPlayers">–</span>
+      </div>
+      <div class="row">
+        <span class="label">IP</span>
+        <button class="ip-btn" id="srvIpBtn" type="button" title="Click to copy">
+          <code id="srvIp">ddragon.net</code>
+          <span class="copy-hint" aria-hidden="true">Copy</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
   <!-- Sidebar + overlay -->
   <div class="overlay" id="overlay" hidden></div>
   <aside class="sidebar" id="sidebar" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="sidebarTitle">
@@ -59,10 +83,12 @@
     </section>
   </main>
 
+
+
   <!-- Site pages menu data -->
   <script id="sitePages" type="application/json">
   [
-    { "title": "Home",      "href": "wiki.ddragon.net" },
+    { "title": "Home",      "href": "index.html" },
     { "title": "Updates",      "href": "updates.html" },
     { "title": "Store",   "href": "https://store.ddragon.net", "external": true },
     { "title": "Discord",   "href": "https://discord.gg/QEj9WFUAbm", "external": true }

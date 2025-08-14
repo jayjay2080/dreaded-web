@@ -319,3 +319,171 @@ body {
   box-shadow: 0 10px 0 var(--stone-950);
 }
 .cta .accent{ color: var(--amethyst-300); }
+
+/* ===== Server Status ===== */
+.server-status { margin-top: 1.25rem; }
+.status-card{
+  background: var(--stone-800);
+  border: 4px solid var(--stone-700);
+  border-radius: calc(var(--radius) + 6px);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 10px 0 var(--stone-950);
+}
+
+.status-top{
+  display:flex; align-items:center; gap:.6rem;
+  margin-bottom:.6rem;
+  font-weight: 900; font-size: 1.05rem;
+}
+.dot{
+  width: 12px; height: 12px; border-radius: 50%;
+  display:inline-block;
+  background: var(--stone-700);
+  box-shadow: 0 0 0 2px var(--stone-950) inset;
+}
+.dot.online{ background: #35d04c; }
+.dot.offline{ background: #e91916; }
+.dot.unknown{ background: #f2c744; }
+
+.status-grid{
+  display:grid; gap:.5rem;
+}
+.row{
+  display:flex; align-items:center; justify-content:space-between;
+  background: var(--stone-850);
+  border: 2px solid var(--stone-700);
+  border-radius: 12px;
+  padding: .55rem .75rem;
+}
+.label{ color: var(--stone-300); font-weight: 700; }
+.value{ font-weight: 900; color: var(--paper); }
+
+.ip-btn{
+  display:flex; align-items:center; gap:.5rem;
+  background: transparent;
+  color: inherit;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.ip-btn code{
+  background: var(--stone-900);
+  border: 2px solid var(--stone-700);
+  border-radius: 8px;
+  padding: .2rem .45rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+.ip-btn:hover code{ border-color: var(--leaf-500); }
+.copy-hint{
+  font-size: .75rem; color: var(--stone-300);
+  border: 1px solid var(--stone-700);
+  border-radius: 6px; padding: 2px 6px;
+}
+
+/* Server status fixed in page's top-right */
+.server-status {
+  position: fixed;
+  top: 90px; /* more space below sticky header */
+  right: 16px;
+  z-index: 60; /* above content, below sidebar (90) */
+  width: 240px;
+  max-width: 90%;
+}
+
+/* Status card styling */
+.status-card {
+  background: var(--stone-800);
+  border: 4px solid var(--stone-700);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 0 var(--stone-950);
+  padding: 0.75rem;
+  overflow-wrap: break-word; /* break long text like IPs */
+}
+
+/* Title row */
+.status-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Status dot */
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--stone-600);
+}
+.dot.online { background: var(--leaf-500); }
+.dot.offline { background: #c0392b; }
+.dot.unknown { background: var(--stone-600); }
+
+/* Info grid */
+.status-grid {
+  display: grid;
+  gap: 0.4rem;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+.label { color: var(--stone-300); }
+.value { font-weight: bold; }
+
+/* Copyable IP button */
+.ip-btn {
+  all: unset;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.ip-btn:hover .copy-hint {
+  text-decoration: underline;
+}
+.copy-hint {
+  font-size: 0.75rem;
+  color: var(--stone-300);
+}
+
+/* On smaller screens, make it inline */
+@media (max-width: 720px) {
+  .server-status {
+    position: static;
+    margin: 1rem auto;
+    display: block;
+    width: min(420px, 92%);
+  }
+}
+
+.status-grid {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  flex-wrap: wrap;              /* allow items to wrap inside box */
+  word-break: break-word;       /* break long words if needed */
+}
+
+.label {
+  color: var(--stone-300);
+  flex: 1 1 auto;                /* let label take available space */
+  min-width: 40%;                /* prevent it from squishing too much */
+}
+
+.value {
+  font-weight: bold;
+  flex: 1 1 auto;                /* let value take available space */
+  text-align: right;
+  min-width: 50%;                /* ensures wrapping instead of overflow */
+  overflow-wrap: anywhere;       /* break long values anywhere */
+}

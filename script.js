@@ -295,3 +295,59 @@ if (stage && dotsWrap && prevBtn && nextBtn && creators.length) {
   initCarousel();
 }
 
+
+
+/* ========== SERVER STATUS (Minecraft) ========== */
+(function initServerStatus(){
+  // Only on Home page and only if the widget is present
+  if ((document.body.getAttribute("data-page") || "") !== "Home") return;
+  const section = document.getElementById("serverStatus");
+  if (!section) return;
+
+  const host = section.dataset.host || "example.com";
+  const port = section.dataset.port || ""; // leave blank for SRV
+  const ipEl = document.getElementById("srvIp");
+  const ipBtn = document.getElementById("srvIpBtn");
+  const stateEl = document.getElementById("srvState");
+  const playersEl = document.getElementById("srvPlayers");
+  const dotEl = document.getElementById("srvDot");
+
+  ipEl.textContent = port ? `${host}:${port}` : host;
+
+  async function fetchStatus(){
+    try {
+      const addr = port ? `${host}:${port}` : host;
+      const url = `https://api.mcsrvstat.us/2/${encodeURIComponent(addr)}?t=${Date.now()}`;
+      const res = await fetch(url, { cache: "no-store" });
+      const data = await res.json();
+
+      if (data && data.online) {
+        dotEl.className = "dot online";
+        stateEl.textContent = "Online";
+        const online = data.players?.online ?? 0;
+        const max = data.players?.max ?? "?";
+        playersEl.textContent = `${online} / ${max}`;
+      } else {
+        dotEl.className = "dot offline";
+        stateEl.textContent = "Offline";
+        playersEl.textContent = "0 / ?";
+      }
+    } catch (e) {
+      dotEl.className = "dot unknown";
+      stateEl.textContent = "Unknown";
+      playersEl.textContent = "–";
+      console.warn("Server status fetch failed:", e);
+    }
+  }
+
+  ipBtn?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(ipEl.textContent.trim());
+      const hint = ipBtn.querySelector(".copy-hint");
+      if (hint) { hint.textContent = "Copied!"; setTimeout(() => hint.textContent = "Copy", 1200); }
+    } catch {}
+  });
+
+  fetchStatus();
+  setInterval(fetchStatus, 60000);
+})();
