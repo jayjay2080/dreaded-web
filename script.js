@@ -1,10 +1,12 @@
 // ====== Creator Carousel (no dependencies) ======
 
-const dataEl = document.getElementById("creatorData");
 const stage = document.getElementById("carouselStage");
 const dotsWrap = document.getElementById("carouselDots");
 const prevBtn = document.querySelector(".nav.prev");
 const nextBtn = document.querySelector(".nav.next");
+
+// Get creators from the HTML <script id="creatorData" type="application/json">
+const creators = JSON.parse(document.getElementById("creatorData").textContent.trim());
 
 let index = 0;
 let timer = null;
@@ -34,7 +36,6 @@ function buildMenu(){
       ext.textContent = "↗";
       a.append(ext);
     }
-    // mark current page
     if (p.title.toLowerCase() === currentPage) {
       a.setAttribute("aria-current", "page");
     }
@@ -54,7 +55,6 @@ function openSidebar(){
   sidebar.setAttribute("aria-hidden", "false");
   overlay.hidden = false;
   openBtn.setAttribute("aria-expanded", "true");
-  // focus first link
   const firstLink = menuList.querySelector("a");
   (firstLink || closeBtn).focus();
 }
@@ -65,7 +65,6 @@ function closeSidebar(){
   sidebar.setAttribute("aria-hidden", "true");
   overlay.hidden = true;
   openBtn.setAttribute("aria-expanded", "false");
-  // restore focus
   (lastFocus || openBtn).focus();
 }
 openBtn.addEventListener("click", openSidebar);
@@ -87,47 +86,91 @@ sidebar.addEventListener("keydown", (e) => {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 });
 
-/* ========== TWITCH API LIVE STATUS ========== */
-async function getLiveStatus(usernames) {
-  const clientId = "kepxt7g525qaqik9hjmujft89nr68v";
-  const token = "rbunfutslxt5u9aqnhr8iaqf2624mj";
+/* ========== TWITCH API HELPERS ========== */
+/** IMPORTANT: Fill these in */
+const TWITCH_CLIENT_ID = "kepxt7g525qaqik9hjmujft89nr68v";
+const TWITCH_APP_TOKEN = "rbunfutslxt5u9aqnhr8iaqf2624mj";
 
-  if (!clientId || !token) {
-    console.warn("Twitch Client ID and Access Token are required to check live status.");
-    return [];
-  }
-
-  const url = `https://api.twitch.tv/helix/streams?` + usernames.map(u => `user_login=${u}`).join('&');
-
-  const res = await fetch(url, {
-    headers: {
-      "Client-ID": clientId,
-      "Authorization": `Bearer ${token}`
-    }
-  });
-
-  const data = await res.json();
-  return data.data.map(stream => stream.user_login.toLowerCase());
+/** Upgrade Twitch avatar URL to sharp sizes (300/600) if it matches Twitch's pattern */
+function twitchHiRes(url) {
+  const m = url && url.match(/(.*-profile_image-)(\d+)x\2(\.(?:png|jpe?g|webp))/i);
+  if (!m) return { src: url, srcset: "" };
+  const base = m[1], ext = m[3];
+  return {
+    src:    `${base}300x300${ext}`,
+    srcset: `${base}300x300${ext} 1x, ${base}600x600${ext} 2x`
+  };
 }
 
-/* ========== CREATOR LIST ========== */
-const creators = [
-  { name: "DJUShorts", twitch: "djushorts", image: "images/profiles/djushorts.png" },
-  { name: "MarioGuy34", twitch: "marioguy34", image: "images/profiles/marioguy34.png" },
-  { name: "JayJay2080", twitch: "jayjay2080", image: "images/profiles/jayjay2080.png" }
-];
+/** Fetch Twitch user profiles to get profile_image_url */
+async function fetchTwitchAvatars(usernames) {
+  if (!TWITCH_CLIENT_ID || !TWITCH_APP_TOKEN) {
+    console.warn("Missing TWITCH_CLIENT_ID / TWITCH_APP_TOKEN. Skipping Twitch avatar fetch.");
+    return {};
+  }
+  // Twitch allows multiple logins in one call: ?login=a&login=b...
+  const url = `https://api.twitch.tv/helix/users?` + usernames.map(u => `login=${encodeURIComponent(u)}`).join("&");
+  const res = await fetch(url, {
+    headers: {
+      "Client-ID": TWITCH_CLIENT_ID,
+      "Authorization": `Bearer ${TWITCH_APP_TOKEN}`
+    }
+  });
+  if (!res.ok) {
+    console.warn("Twitch users fetch failed:", res.status, await res.text());
+    return {};
+  }
+  const payload = await res.json();
+  const map = {};
+  (payload.data || []).forEach(user => {
+    map[user.login.toLowerCase()] = user.profile_image_url;
+  });
+  return map;
+}
 
-/* ========== BUILD CARDS ========== */
+/** Fetch live status for logins */
+async function fetchLiveUsers(usernames) {
+  if (!TWITCH_CLIENT_ID || !TWITCH_APP_TOKEN) {
+    console.warn("Missing TWITCH_CLIENT_ID / TWITCH_APP_TOKEN. Skipping live status fetch.");
+    return new Set();
+  }
+  // Twitch: /helix/streams?user_login=a&user_login=b...
+  const url = `https://api.twitch.tv/helix/streams?` + usernames.map(u => `user_login=${encodeURIComponent(u)}`).join("&");
+  const res = await fetch(url, {
+    headers: {
+      "Client-ID": TWITCH_CLIENT_ID,
+      "Authorization": `Bearer ${TWITCH_APP_TOKEN}`
+    }
+  });
+  if (!res.ok) {
+    console.warn("Twitch streams fetch failed:", res.status, await res.text());
+    return new Set();
+  }
+  const payload = await res.json();
+  const lives = new Set((payload.data || []).map(s => (s.user_login || "").toLowerCase()));
+  return lives;
+}
+
+/* ========== BUILD CARDS (with Twitch avatars + LIVE badge) ========== */
 let cards = [];
 
 async function initCarousel() {
-  const liveUsers = await getLiveStatus(creators.map(c => c.twitch));
-  stage.innerHTML = '';
-  cards = creators.map((c, i) => createCardWithLive(c, i, liveUsers));
+  // Who are we querying on Twitch?
+  const logins = creators.map(c => (c.twitch || c.name || "").toLowerCase());
+
+  // Get avatars + live status in parallel
+  const [avatarMap, liveSet] = await Promise.all([
+    fetchTwitchAvatars(logins),
+    fetchLiveUsers(logins)
+  ]);
+
+  // Clear stage & dots and rebuild
+  stage.innerHTML = "";
+  dotsWrap.innerHTML = "";
+
+  cards = creators.map((c, i) => createCardWithTwitch(c, i, avatarMap, liveSet));
   cards.forEach(c => stage.appendChild(c));
 
-  // Dots
-  dotsWrap.innerHTML = '';
   creators.forEach((_, i) => {
     const b = document.createElement("button");
     b.type = "button";
@@ -141,7 +184,9 @@ async function initCarousel() {
   startAuto();
 }
 
-function createCardWithLive({ name, twitch, image }, i, liveUsers) {
+function createCardWithTwitch({ name, twitch, avatar }, i, avatarMap, liveSet) {
+  const login = (twitch || name || "").toLowerCase();
+
   const a = document.createElement("a");
   a.className = "card";
   a.href = `https://twitch.tv/${twitch || name}`;
@@ -155,11 +200,22 @@ function createCardWithLive({ name, twitch, image }, i, liveUsers) {
   const frame = document.createElement("div");
   frame.className = "frame";
 
-  if (image) {
+  // Prefer Twitch avatar; fallback to provided avatar; fallback to monogram
+  const twitchAvatar = avatarMap[login];
+  if (twitchAvatar) {
     const img = document.createElement("img");
     img.alt = `${name} avatar`;
     img.loading = "lazy";
-    img.src = image;
+    const hi = twitchHiRes(twitchAvatar);
+    img.src = hi.src;
+    if (hi.srcset) img.srcset = hi.srcset;
+    img.sizes = "(max-width: 700px) 90vw, 280px";
+    frame.appendChild(img);
+  } else if (avatar) {
+    const img = document.createElement("img");
+    img.alt = `${name} avatar`;
+    img.loading = "lazy";
+    img.src = avatar;
     frame.appendChild(img);
   } else {
     const mono = document.createElement("div");
@@ -170,7 +226,8 @@ function createCardWithLive({ name, twitch, image }, i, liveUsers) {
     frame.appendChild(mono);
   }
 
-  if (liveUsers.includes(twitch.toLowerCase())) {
+  // LIVE badge + highlight
+  if (liveSet.has(login)) {
     const badge = document.createElement("div");
     badge.className = "live-badge";
     badge.textContent = "LIVE";
@@ -193,13 +250,14 @@ function createCardWithLive({ name, twitch, image }, i, liveUsers) {
 
   a.append(frame, meta);
 
+  // Non-center click focuses first
   a.addEventListener("click", (e) => {
     if (i !== index) {
       e.preventDefault();
       goTo(i);
     }
   });
-
+  // Keyboard nav
   a.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
     if (e.key === "ArrowRight") { e.preventDefault(); next(); }
