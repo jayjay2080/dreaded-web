@@ -1,7 +1,6 @@
 // ====== Creator Carousel (no dependencies) ======
 
 const dataEl = document.getElementById("creatorData");
-const creators = JSON.parse(dataEl.textContent.trim());
 const stage = document.getElementById("carouselStage");
 const dotsWrap = document.getElementById("carouselDots");
 const prevBtn = document.querySelector(".nav.prev");
@@ -88,21 +87,61 @@ sidebar.addEventListener("keydown", (e) => {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 });
 
-// Build cards from data
-const cards = creators.map((c, i) => createCard(c, i));
-cards.forEach(c => stage.appendChild(c));
+/* ========== TWITCH API LIVE STATUS ========== */
+async function getLiveStatus(usernames) {
+  const clientId = "kepxt7g525qaqik9hjmujft89nr68v";
+  const token = "rbunfutslxt5u9aqnhr8iaqf2624mj";
 
-// Build dots
-creators.forEach((_, i) => {
-  const b = document.createElement("button");
-  b.type = "button";
-  b.setAttribute("role", "tab");
-  b.setAttribute("aria-label", `Go to slide ${i + 1}`);
-  b.addEventListener("click", () => goTo(i));
-  dotsWrap.appendChild(b);
-});
+  if (!clientId || !token) {
+    console.warn("Twitch Client ID and Access Token are required to check live status.");
+    return [];
+  }
 
-function createCard({ name, twitch, avatar }, i) {
+  const url = `https://api.twitch.tv/helix/streams?` + usernames.map(u => `user_login=${u}`).join('&');
+
+  const res = await fetch(url, {
+    headers: {
+      "Client-ID": clientId,
+      "Authorization": `Bearer ${token}`
+    }
+  });
+
+  const data = await res.json();
+  return data.data.map(stream => stream.user_login.toLowerCase());
+}
+
+/* ========== CREATOR LIST ========== */
+const creators = [
+  { name: "DJUShorts", twitch: "djushorts", image: "images/profiles/djushorts.png" },
+  { name: "MarioGuy34", twitch: "marioguy34", image: "images/profiles/marioguy34.png" },
+  { name: "JayJay2080", twitch: "jayjay2080", image: "images/profiles/jayjay2080.png" }
+];
+
+/* ========== BUILD CARDS ========== */
+let cards = [];
+
+async function initCarousel() {
+  const liveUsers = await getLiveStatus(creators.map(c => c.twitch));
+  stage.innerHTML = '';
+  cards = creators.map((c, i) => createCardWithLive(c, i, liveUsers));
+  cards.forEach(c => stage.appendChild(c));
+
+  // Dots
+  dotsWrap.innerHTML = '';
+  creators.forEach((_, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-label", `Go to slide ${i + 1}`);
+    b.addEventListener("click", () => goTo(i));
+    dotsWrap.appendChild(b);
+  });
+
+  render();
+  startAuto();
+}
+
+function createCardWithLive({ name, twitch, image }, i, liveUsers) {
   const a = document.createElement("a");
   a.className = "card";
   a.href = `https://twitch.tv/${twitch || name}`;
@@ -116,20 +155,27 @@ function createCard({ name, twitch, avatar }, i) {
   const frame = document.createElement("div");
   frame.className = "frame";
 
-  if (avatar) {
+  if (image) {
     const img = document.createElement("img");
     img.alt = `${name} avatar`;
     img.loading = "lazy";
-    img.src = avatar;
+    img.src = image;
     frame.appendChild(img);
   } else {
-    // Monogram if no image
     const mono = document.createElement("div");
     mono.className = "monogram";
     const span = document.createElement("span");
     span.textContent = initials(name);
     mono.appendChild(span);
     frame.appendChild(mono);
+  }
+
+  if (liveUsers.includes(twitch.toLowerCase())) {
+    const badge = document.createElement("div");
+    badge.className = "live-badge";
+    badge.textContent = "LIVE";
+    a.classList.add("live");
+    a.appendChild(badge);
   }
 
   const meta = document.createElement("div");
@@ -147,7 +193,6 @@ function createCard({ name, twitch, avatar }, i) {
 
   a.append(frame, meta);
 
-  // When non-center card is clicked, focus it first instead of leaving the page
   a.addEventListener("click", (e) => {
     if (i !== index) {
       e.preventDefault();
@@ -155,7 +200,6 @@ function createCard({ name, twitch, avatar }, i) {
     }
   });
 
-  // Keyboard support: left/right to navigate
   a.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
     if (e.key === "ArrowRight") { e.preventDefault(); next(); }
@@ -172,15 +216,12 @@ function initials(name) {
     .join("");
 }
 
-// Position cards with a coverflow look
+/* ========== RENDER & CONTROLS ========== */
 function render() {
   const len = creators.length;
-
-  // order: center, two left, two right
   const order = [index - 2, index - 1, index, index + 1, index + 2]
     .map(n => (n % len + len) % len);
 
-  // base transforms by offset
   const depths = {
     "-2": { x: -220, rot: -8, scale: 0.72, z: -140, blur: 2, op: .75, idx: 1 },
     "-1": { x: -120, rot: -5, scale: 0.86, z:  -70, blur: 1, op: .9,  idx: 2 },
@@ -189,15 +230,14 @@ function render() {
     "2" : { x:  220, rot:  8, scale: 0.72, z: -140, blur: 2, op: .75, idx: 1 }
   };
 
-  // reset classes
   cards.forEach(c => {
     c.classList.remove("center", "blur-1", "blur-2");
-    c.querySelector(".hint").style.visibility = "visible";
+    const hintEl = c.querySelector(".hint");
+    if (hintEl) hintEl.style.visibility = "visible";
   });
 
-  // apply transforms
   order.forEach((id, layerIdx) => {
-    const offset = layerIdx - 2; // -2..2
+    const offset = layerIdx - 2;
     const cfg = depths[offset.toString()];
     const card = cards[id];
 
@@ -210,11 +250,11 @@ function render() {
 
     if (offset === 0) {
       card.classList.add("center");
-      card.querySelector(".hint").style.visibility = "hidden";
+      const hintEl = card.querySelector(".hint");
+      if (hintEl) hintEl.style.visibility = "hidden";
     }
   });
 
-  // dots
   [...dotsWrap.children].forEach((d, i) => {
     d.setAttribute("aria-selected", i === index ? "true" : "false");
   });
@@ -224,7 +264,6 @@ function prev(){ index = (index - 1 + creators.length) % creators.length; render
 function next(){ index = (index + 1) % creators.length; render(); }
 function goTo(i){ index = (i % creators.length + creators.length) % creators.length; render(); }
 
-// Auto-advance
 function startAuto(){
   stopAuto();
   timer = setInterval(next, 6000);
@@ -234,16 +273,13 @@ function stopAuto(){
   timer = null;
 }
 
-// Controls
 prevBtn.addEventListener("click", prev);
 nextBtn.addEventListener("click", next);
 
-// Pause on hover/focus
 stage.addEventListener("mouseenter", () => { paused = true; stopAuto(); });
 stage.addEventListener("mouseleave", () => { paused = false; startAuto(); });
 stage.addEventListener("focusin", () => { paused = true; stopAuto(); });
 stage.addEventListener("focusout", () => { if (!paused) startAuto(); });
 
-// Kick off
-render();
-startAuto();
+/* ========== STARTUP ========== */
+initCarousel();

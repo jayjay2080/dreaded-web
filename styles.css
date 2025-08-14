@@ -1,3 +1,26 @@
+
+/* Live badge */
+.live-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #e91916; /* Twitch live red */
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  z-index: 2;
+}
+
+/* Highlight when live */
+.card.live {
+  border-color: #e91916;
+  box-shadow: 0 18px 0 var(--stone-950), 0 0 15px rgba(233, 25, 22, 0.6);
+}
+
+
 /* ===== Sidebar ===== */
 .overlay{
   position: fixed; inset: 0;
