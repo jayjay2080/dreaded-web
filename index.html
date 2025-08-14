@@ -1,1 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dreaded Dragons – Creators</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <button class="menu-btn" aria-label="Open menu">
+      <!-- hamburger -->
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+    </button>
+    <h1 class="logo">Dreaded <span>Dragons</span></h1>
+  </header>
 
+  <main class="container">
+    <section class="hero">
+      <p>Check out the <strong>creators</strong> you play with!</p>
+    </section>
+
+    <!-- Carousel -->
+    <section class="carousel-section">
+      <div class="carousel" id="creatorCarousel" aria-roledescription="carousel">
+        <button class="nav prev" aria-label="Previous">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+
+        <div class="stage" id="carouselStage" tabindex="0">
+          <!-- Cards get injected by JS from the #creatorData template -->
+        </div>
+
+        <button class="nav next" aria-label="Next">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+      </div>
+
+      <div class="dots" id="carouselDots" role="tablist" aria-label="Carousel Pagination"></div>
+    </section>
+
+    <section class="cta">
+      <p>Tip: Click a creator to jump straight to their <strong class="accent">Twitch</strong> channel.</p>
+    </section>
+  </main>
+
+  <!-- Creators: add/edit rows below. avatar is optional. -->
+  <script id="creatorData" type="application/json">
+  [
+    { "name": "Clawerz",        "twitch": "clawerz",        "avatar": "" },
+    { "name": "RedstoneRogue",  "twitch": "redstonerogue",  "avatar": "" },
+    { "name": "CreeperQueen",   "twitch": "creeperqueen",   "avatar": "" },
+    { "name": "BlockSmith",     "twitch": "blocksmith",     "avatar": "" },
+    { "name": "EnderEli",       "twitch": "endereli",       "avatar": "" },
+    { "name": "NetherNick",     "twitch": "nethernick",     "avatar": "" }
+  ]
+  </script>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
