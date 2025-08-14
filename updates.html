@@ -7,12 +7,13 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 
+<!-- Mark the current page here -->
 <body data-page="Updates">
   <header class="site-header">
     <button class="menu-btn" aria-label="Open menu" aria-haspopup="dialog" aria-controls="sidebar" aria-expanded="false">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" fill="none" stroke-width="2"/></svg>
     </button>
-    <h1 class="logo">Dreaded <span>Dragons</span></h1>
+    <h1 class="logo">Dreaded <span>Dragons</span> – Updates</h1>
   </header>
 
   <!-- Sidebar + overlay -->
@@ -31,23 +32,22 @@
 
   <main class="container">
     <section class="hero">
-      <h2>Server Updates & Changelog</h2>
-      <p>Keep up with the latest additions, fixes, and improvements to the SMP!</p>
+      <p>Stay up to date with all <strong>additions</strong>, <strong>changes</strong>, and <strong>fixes</strong> to the Dreaded Dragons SMP.</p>
     </section>
 
-    <section class="updates-list" id="updatesList" aria-live="polite">
-      <!-- Populated by script.js from updates.json -->
-      <div class="updates-loading" id="updatesLoading">Loading updates…</div>
+    <!-- Updates list -->
+    <section class="updates-list" id="updatesList">
+      <div id="updatesLoading" class="updates-loading">Loading updates...</div>
     </section>
   </main>
 
   <!-- Site pages menu data -->
   <script id="sitePages" type="application/json">
   [
-    { "title": "Home",     "href": "index.html" },
-    { "title": "Updates",  "href": "updates.html" },
-    { "title": "Store",    "href": "store.ddragon.net", "external": true },
-    { "title": "Discord",  "href": "https://discord.gg/QEj9WFUAbm", "external": true }
+    { "title": "Home",      "href": "index.html" },
+    { "title": "Updates",   "href": "updates.html" },
+    { "title": "Store",     "href": "store.ddragon.net", "external": true },
+    { "title": "Discord",   "href": "https://discord.gg/QEj9WFUAbm", "external": true }
   ]
   </script>
 

@@ -351,27 +351,46 @@ initCarousel();
   const fmt = new Intl.DateTimeFormat(undefined, { dateStyle: "long" });
 
   try {
-    const res = await fetch("updates.json", { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
+    // Build a safe absolute URL and add a cache-busting query
+    const updatesUrl = new URL("updates.json", location.href).toString() + `?v=${Date.now()}`;
+    const res = await fetch(updatesUrl, { cache: "no-store" });
 
-    // Sort newest first by date (YYYY-MM-DD expected)
-    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    if (!res.ok) {
+      throw new Error(`Failed to fetch updates.json (${res.status} ${res.statusText}) at ${res.url}`);
+    }
 
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error("updates.json is not valid JSON. Check for trailing commas or smart quotes.");
+    }
+
+    if (!Array.isArray(data)) {
+      throw new Error("updates.json should be a JSON array (e.g., [ { ... }, { ... } ]).");
+    }
+
+    // Sort newest first
+    data.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+    // Render
     list.innerHTML = "";
     data.forEach(entry => {
       const art = document.createElement("article");
       art.className = "update";
 
+      const title = entry.title || "Update";
+      const dateStr = entry.date ? fmt.format(new Date(entry.date)) : "";
+
       const h3 = document.createElement("h3");
-      h3.textContent = entry.title || "Update";
+      h3.textContent = title;
+
       const date = document.createElement("div");
       date.className = "date";
-      date.textContent = entry.date ? fmt.format(new Date(entry.date)) : "";
+      date.textContent = dateStr;
 
       art.append(h3, date);
 
-      // If categorized groups exist, render each; otherwise fall back to 'changes'
       const groups = [
         ["added",   "Added",   "added"],
         ["changed", "Changed", "changed"],
@@ -380,10 +399,12 @@ initCarousel();
       ];
 
       let renderedAnyGroup = false;
+
       groups.forEach(([key, label, cls]) => {
         const items = entry[key];
         if (Array.isArray(items) && items.length) {
           renderedAnyGroup = true;
+
           const gt = document.createElement("div");
           gt.className = "group-title";
           const badge = document.createElement("span");
@@ -415,9 +436,14 @@ initCarousel();
       list.appendChild(art);
     });
 
+    // If the JSON was empty
+    if (!list.children.length) {
+      list.innerHTML = `<div class="updates-error" role="status">No updates yet. Check back soon!</div>`;
+    }
+
   } catch (err) {
-    console.error("Failed to load updates:", err);
-    list.innerHTML = `<div class="updates-error" role="alert">Couldn’t load updates right now.</div>`;
+    console.error(err);
+    list.innerHTML = `<div class="updates-error" role="alert">${String(err.message || err)}</div>`;
   } finally {
     if (loadingEl) loadingEl.remove();
   }

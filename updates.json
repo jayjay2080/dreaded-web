@@ -1,34 +1,3 @@
 [
-  {
-    "date": "2025-08-14",
-    "title": "New Nether Hub",
-    "added": [
-      "Central Nether hub with 8 portals for easier travel."
-    ],
-    "changed": [
-      "Hub decorated with quartz pillars & glowstone lighting."
-    ]
-  },
-  {
-    "date": "2025-08-10",
-    "title": "Quality of Life Improvements",
-    "added": [
-      "Expanded villager trading hall to include armorers."
-    ],
-    "changed": [
-      "Increased mob cap for better farm output.",
-      "Map wall updated to show new player builds."
-    ],
-    "fixed": [
-      "Resolved Nether roof suffocation on login."
-    ]
-  },
-  {
-    "date": "2025-08-01",
-    "title": "Server Launch!",
-    "changes": [
-      "Spawn area completed with community board and basic farms.",
-      "Rules & info book placed in player starter chests."
-    ]
-  }
+  { "date": "2025-10-14", "title": "Start of SMP", "added": ["Released SMP with IP: ddragon.net"] }
 ]
