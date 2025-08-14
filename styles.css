@@ -1,9 +1,5 @@
-.updates-list {
-  margin-top: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
+
+.updates-list { margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
 .update {
   background: var(--stone-800);
   border: 4px solid var(--stone-700);
@@ -11,20 +7,28 @@
   padding: 1rem 1.25rem;
   box-shadow: 0 8px 0 var(--stone-950);
 }
-.update h3 {
-  margin-top: 0;
-  color: var(--leaf-300);
-  font-size: 1.2rem;
-}
-.update ul {
-  margin: 0.5rem 0 0;
-  padding-left: 1.25rem;
-}
-.update li {
-  margin-bottom: 0.4rem;
-}
+.update h3 { margin: 0 0 .4rem; color: var(--leaf-300); font-size: 1.2rem; }
+.update .date { color: var(--stone-300); font-size: .9rem; margin-bottom: .6rem; }
+.update ul { margin: .4rem 0 0; padding-left: 1.25rem; }
+.update li { margin: .28rem 0; }
 
+.group-title { margin: .6rem 0 .2rem; font-weight: 800; color: var(--paper); }
+.badge { display: inline-block; font-size: .75rem; padding: 2px 6px; border-radius: 6px; margin-right: .4rem; }
+.badge.added { background: var(--leaf-500); color: var(--stone-950); }
+.badge.changed { background: #f2c744; color: #2a2a2a; }
+.badge.fixed { background: #6ecbff; color: #12202b; }
+.badge.removed { background: #e45b5b; color: #fff; }
 
+.updates-loading,
+.updates-error {
+  background: var(--stone-800);
+  border: 4px solid var(--stone-700);
+  border-radius: calc(var(--radius) + 4px);
+  padding: 1rem 1.25rem;
+  box-shadow: 0 8px 0 var(--stone-950);
+  text-align: center;
+  color: var(--stone-300);
+}
 
 /* Live badge */
 .live-badge {

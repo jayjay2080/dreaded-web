@@ -7,22 +7,26 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 
-<!-- Mark the current page here -->
+<!-- Mark current page for sidebar highlighting -->
 <body data-page="Updates">
   <header class="site-header">
     <button class="menu-btn" aria-label="Open menu" aria-haspopup="dialog" aria-controls="sidebar" aria-expanded="false">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" fill="none" stroke-width="2"/>
+      </svg>
     </button>
     <h1 class="logo">Dreaded <span>Dragons</span> – Updates</h1>
   </header>
 
-  <!-- Sidebar + overlay -->
+  <!-- Sidebar + overlay (same IDs/classes as index.html) -->
   <div class="overlay" id="overlay" hidden></div>
   <aside class="sidebar" id="sidebar" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="sidebarTitle">
     <div class="sidebar-head">
       <h2 class="sidebar-title" id="sidebarTitle">Menu</h2>
       <button class="close-btn" id="closeSidebar" aria-label="Close menu">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" fill="none" stroke-width="2"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" fill="none" stroke-width="2"/>
+        </svg>
       </button>
     </div>
     <nav class="side-nav">
@@ -35,13 +39,24 @@
       <p>Stay up to date with all <strong>additions</strong>, <strong>changes</strong>, and <strong>fixes</strong> to the Dreaded Dragons SMP.</p>
     </section>
 
-    <!-- Updates list -->
+    <!-- Static updates list (styled by your existing CSS) -->
     <section class="updates-list" id="updatesList">
-      <div id="updatesLoading" class="updates-loading">Loading updates...</div>
+      <!-- <article class="update">
+        <h3>August 16, 2025 – Release</h3>
+        <div class="date">v1.0.0</div>
+        <div class="group-title"><span class="badge added">Added</span></div>
+        <ul>
+          <li>Knives Datapack + Charms Datapack.</li>
+        </ul>
+        <div class="group-title"><span class="badge changed">Changed</span></div>
+        <ul>
+          <li>Quartz pillars & glowstone lighting for better visibility.</li>
+        </ul>
+      </article> -->
     </section>
   </main>
 
-  <!-- Site pages menu data -->
+  <!-- Site pages menu data (used by your script.js buildMenu) -->
   <script id="sitePages" type="application/json">
   [
     { "title": "Home",      "href": "index.html" },
@@ -51,6 +66,7 @@
   ]
   </script>
 
+  <!-- Your existing behavior -->
   <script src="script.js" defer></script>
 </body>
 </html>
