@@ -11,6 +11,83 @@ let index = 0;
 let timer = null;
 let paused = false;
 
+/* ========== SIDEBAR MENU ========== */
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const openBtn = document.querySelector(".menu-btn");
+const closeBtn = document.getElementById("closeSidebar");
+const menuList = document.getElementById("menuList");
+const pagesData = JSON.parse(document.getElementById("sitePages").textContent.trim());
+const currentPage = (document.body.getAttribute("data-page") || "").toLowerCase();
+
+function buildMenu(){
+  menuList.innerHTML = "";
+  pagesData.forEach(p => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = p.href;
+    a.textContent = p.title;
+    if (p.external) {
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      const ext = document.createElement("span");
+      ext.className = "ext";
+      ext.textContent = "↗";
+      a.append(ext);
+    }
+    // mark current page
+    if (p.title.toLowerCase() === currentPage) {
+      a.setAttribute("aria-current", "page");
+    }
+    li.appendChild(a);
+    menuList.appendChild(li);
+  });
+}
+buildMenu();
+
+// Open/close helpers with focus management
+let lastFocus = null;
+function openSidebar(){
+  if (sidebar.classList.contains("open")) return;
+  lastFocus = document.activeElement;
+  document.body.classList.add("sidebar-open");
+  sidebar.classList.add("open");
+  sidebar.setAttribute("aria-hidden", "false");
+  overlay.hidden = false;
+  openBtn.setAttribute("aria-expanded", "true");
+  // focus first link
+  const firstLink = menuList.querySelector("a");
+  (firstLink || closeBtn).focus();
+}
+function closeSidebar(){
+  if (!sidebar.classList.contains("open")) return;
+  document.body.classList.remove("sidebar-open");
+  sidebar.classList.remove("open");
+  sidebar.setAttribute("aria-hidden", "true");
+  overlay.hidden = true;
+  openBtn.setAttribute("aria-expanded", "false");
+  // restore focus
+  (lastFocus || openBtn).focus();
+}
+openBtn.addEventListener("click", openSidebar);
+closeBtn.addEventListener("click", closeSidebar);
+overlay.addEventListener("click", closeSidebar);
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && sidebar.classList.contains("open")) {
+    e.preventDefault(); closeSidebar();
+  }
+});
+// Simple focus trap
+sidebar.addEventListener("keydown", (e) => {
+  if (e.key !== "Tab") return;
+  const foci = sidebar.querySelectorAll("a,button,[tabindex]:not([tabindex='-1'])");
+  const list = Array.from(foci).filter(el => !el.hasAttribute("disabled"));
+  if (!list.length) return;
+  const first = list[0], last = list[list.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
 // Build cards from data
 const cards = creators.map((c, i) => createCard(c, i));
 cards.forEach(c => stage.appendChild(c));

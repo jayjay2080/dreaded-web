@@ -1,3 +1,80 @@
+/* ===== Sidebar ===== */
+.overlay{
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(2px);
+  z-index: 80;
+}
+
+.sidebar{
+  position: fixed; inset: 0 auto 0 0;
+  width: min(86vw, 320px);
+  background: var(--stone-850);
+  border-right: 4px solid var(--stone-700);
+  box-shadow: 10px 0 0 var(--stone-950);
+  transform: translateX(-100%);
+  transition: transform .35s cubic-bezier(.22,.72,.22,1), visibility 0s linear .35s;
+  z-index: 90;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  visibility: hidden;
+}
+.sidebar.open{
+  transform: translateX(0);
+  visibility: visible;
+  transition: transform .35s cubic-bezier(.22,.72,.22,1);
+}
+.sidebar-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: .9rem .9rem .6rem;
+  border-bottom: 1px solid var(--stone-700);
+  background: var(--stone-800);
+}
+.sidebar-title{
+  margin:0; font-size: 1.15rem; font-weight: 800;
+}
+.close-btn{
+  display:grid; place-items:center;
+  width:40px; height:40px; border-radius:10px;
+  border: 2px solid var(--stone-700);
+  background: var(--stone-800); color: var(--paper);
+}
+.close-btn svg{ width:22px; height:22px; }
+
+.side-nav{
+  overflow:auto;
+  padding: .5rem;
+}
+.menu-list{
+  list-style:none; margin:0; padding:0;
+  display:flex; flex-direction:column; gap:.35rem;
+}
+.menu-list a{
+  display:flex; align-items:center; gap:.6rem;
+  padding: .7rem .8rem;
+  border-radius: 12px;
+  color: var(--paper);
+  text-decoration:none;
+  border: 2px solid var(--stone-800);
+  background: var(--stone-800);
+}
+.menu-list a:hover{ background: var(--stone-750); border-color: var(--stone-700); }
+.menu-list a[aria-current="page"]{
+  background: color-mix(in oklab, var(--leaf-500) 30%, var(--stone-800));
+  border-color: var(--leaf-500);
+  box-shadow: inset 0 0 0 2px var(--leaf-900);
+}
+.menu-list .ext{
+  margin-left: auto;
+  font-size: .8rem; color: var(--stone-300);
+  opacity: .9;
+}
+
+/* Prevent body scroll when sidebar is open */
+body.sidebar-open{
+  overflow: hidden;
+}
+
 /* ---------- Minecraft-inspired theme ---------- */
 :root{
   --leaf-300:#8CD05F;  /* bright grass */
